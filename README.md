@@ -1,2 +1,7 @@
-# proxy
-Pretty little proxies…
+# Proxy
+
+Pretty little proxies.
+
+## License
+
+[MIT licensed](LICENSE), natch :wink:
