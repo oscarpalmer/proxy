@@ -9,8 +9,13 @@
 		"bun": "^1.0",
 		"typescript": "^5.3.0"
 	},
+	"files": [
+		"dist",
+		"src"
+	],
 	"license": "MIT",
-	"module": "src/index.ts",
+	"main": "dist/proxy.js",
+	"module": "dist/proxy.js",
 	"name": "@oscarpalmer/proxy",
 	"repository": {
 		"type": "git",
@@ -20,5 +25,5 @@
 		"build": "bun build ./src/index.ts --outfile ./dist/proxy.js"
 	},
 	"type": "module",
-	"version": "0.1.0"
+	"version": "0.1.1"
 }
