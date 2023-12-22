@@ -1,23 +1,44 @@
 // src/index.ts
+var arrayHandler = function(id, array, property) {
+  function synthetic(...args) {
+    return Array.prototype[property].apply(array, args);
+  }
+  switch (property) {
+    case "copyWithin":
+    case "pop":
+    case "reverse":
+    case "shift":
+    case "sort":
+      return synthetic;
+    case "fill":
+    case "push":
+    case "unshift":
+      return (...items) => synthetic(...transform(id, items));
+    case "splice":
+      return (start, deleteCount, ...items) => synthetic(start, deleteCount, ...transform(id, items));
+    default:
+      return Reflect.get(array, property);
+  }
+};
 var createProxy = function(id, value) {
   if (isProxy(value) || !isObject(value)) {
     return value;
   }
+  const isArray = Array.isArray(value);
   const proxyId = id ?? new ID;
   const proxyValue = transform(proxyId, value);
   const proxy = new Proxy(proxyValue, {
     get(target, property) {
-      return property === idKey ? proxyId : Reflect.get(target, property);
+      if (property === idKey) {
+        return proxyId;
+      }
+      return isArray && property in Array.prototype ? arrayHandler(proxyId, target, property) : Reflect.get(target, property);
     },
     has(target, property) {
       return property === idKey || Reflect.has(target, property);
     },
     set(target, property, value2) {
-      if (property === idKey) {
-        return false;
-      }
-      const tranformed = transform(proxyId, value2);
-      return Reflect.set(target, property, tranformed);
+      return property === idKey ? false : Reflect.set(target, property, transform(proxyId, value2));
     }
   });
   Object.defineProperty(proxy, idKey, {
@@ -35,11 +56,12 @@ var transform = function(id, value) {
   if (!isObject(value)) {
     return value;
   }
-  const result = Array.isArray(value) ? [] : {};
+  if (Array.isArray(value)) {
+    return value.map((item) => createProxy(id, item));
+  }
+  const result = {};
   for (const key in value) {
-    if (key in value) {
-      result[key] = createProxy(id, value[key]);
-    }
+    result[key] = createProxy(id, value[key]);
   }
   return result;
 };

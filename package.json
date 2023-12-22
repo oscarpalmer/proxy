@@ -27,5 +27,5 @@
 		"watch": "bun watch ./src/index.ts --outfile ./dist/proxy.js --watch"
 	},
 	"type": "module",
-	"version": "0.2.0"
+	"version": "0.3.0"
 }
