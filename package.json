@@ -22,8 +22,10 @@
 		"url": "git+https://github.com/oscarpalmer/proxy.git"
 	},
 	"scripts": {
-		"build": "bun build ./src/index.ts --outfile ./dist/proxy.js"
+		"build": "bun build ./src/index.ts --outfile ./dist/proxy.js",
+		"test": "bun test --coverage",
+		"watch": "bun watch ./src/index.ts --outfile ./dist/proxy.js --watch"
 	},
 	"type": "module",
-	"version": "0.1.1"
+	"version": "0.2.0"
 }
