@@ -86,6 +86,12 @@ function isProxy(value: unknown): boolean {
 	return (value as GenericObject)?.[idKey] instanceof ID;
 }
 
+/**
+ * Create a reactive proxy value from an array or object.
+ * @template {(unknown[] | Record<number | string, unknown>)} Model
+ * @param {Model} value
+ * @returns {Model}
+ */
 export default function proxy<Model extends ProxyValue>(value: Model): Model {
 	if (typeof value !== 'object' || value === null) {
 		throw new TypeError('Value must be an object');

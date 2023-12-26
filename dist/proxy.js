@@ -70,6 +70,12 @@ var idKey = "__id__";
 
 class ID {
 }
+/**
+ * Create a reactive proxy value from an array or object.
+ * @template {(unknown[] | Record<number | string, unknown>)} Model
+ * @param {Model} value
+ * @returns {Model}
+ */
 function proxy(value) {
   if (typeof value !== "object" || value === null) {
     throw new TypeError("Value must be an object");
