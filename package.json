@@ -24,8 +24,8 @@
 	"scripts": {
 		"build": "bun build ./src/index.ts --outfile ./dist/proxy.js",
 		"test": "bun test --coverage",
-		"watch": "bun watch ./src/index.ts --outfile ./dist/proxy.js --watch"
+		"watch": "bun build ./src/index.ts --outfile ./dist/proxy.js --watch"
 	},
 	"type": "module",
-	"version": "0.3.0"
+	"version": "0.4.0"
 }

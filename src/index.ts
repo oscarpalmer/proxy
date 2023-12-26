@@ -13,7 +13,9 @@ function arrayHandler(
 	property: PropertyKey,
 ): unknown {
 	function synthetic(...args: unknown[]): unknown {
-		return (Array.prototype[property as never] as Function).apply(array, args);
+		return (
+			Array.prototype[property as never] as (...args: unknown[]) => unknown
+		).apply(array, args);
 	}
 
 	switch (property) {
@@ -28,11 +30,11 @@ function arrayHandler(
 		case 'push':
 		case 'unshift':
 			return (...items: unknown[]) =>
-				synthetic(...(transform(id, items) as unknown[]));
+				synthetic(...(createProxy(id, items) as unknown[]));
 
 		case 'splice':
 			return (start: number, deleteCount?: number, ...items: unknown[]) =>
-				synthetic(start, deleteCount, ...(transform(id, items) as unknown[]));
+				synthetic(start, deleteCount, ...(createProxy(id, items) as unknown[]));
 
 		default:
 			return Reflect.get(array, property);
@@ -65,7 +67,7 @@ function createProxy(id: ID | undefined, value: unknown): unknown {
 		set(target, property, value) {
 			return property === idKey
 				? false
-				: Reflect.set(target, property, transform(proxyId, value as never));
+				: Reflect.set(target, property, createProxy(proxyId, value as never));
 		},
 	});
 
@@ -80,12 +82,12 @@ function isObject(value: unknown): boolean {
 	return constructors.has(value?.constructor?.name ?? '');
 }
 
-export function isProxy(value: unknown): boolean {
+function isProxy(value: unknown): boolean {
 	return (value as GenericObject)?.[idKey] instanceof ID;
 }
 
 export default function proxy<Model extends ProxyValue>(value: Model): Model {
-	if (typeof value !== 'object' || value === undefined || value === null) {
+	if (typeof value !== 'object' || value === null) {
 		throw new TypeError('Value must be an object');
 	}
 
@@ -103,7 +105,7 @@ function transform(id: ID, value: ProxyValue): unknown {
 
 	const result = {} as GenericObject;
 
-	for (const key in value as Object) {
+	for (const key in value) {
 		result[key] = createProxy(id, value[key] as never);
 	}
 

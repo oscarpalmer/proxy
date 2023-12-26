@@ -13,9 +13,9 @@ var arrayHandler = function(id, array, property) {
     case "fill":
     case "push":
     case "unshift":
-      return (...items) => synthetic(...transform(id, items));
+      return (...items) => synthetic(...createProxy(id, items));
     case "splice":
-      return (start, deleteCount, ...items) => synthetic(start, deleteCount, ...transform(id, items));
+      return (start, deleteCount, ...items) => synthetic(start, deleteCount, ...createProxy(id, items));
     default:
       return Reflect.get(array, property);
   }
@@ -38,7 +38,7 @@ var createProxy = function(id, value) {
       return property === idKey || Reflect.has(target, property);
     },
     set(target, property, value2) {
-      return property === idKey ? false : Reflect.set(target, property, transform(proxyId, value2));
+      return property === idKey ? false : Reflect.set(target, property, createProxy(proxyId, value2));
     }
   });
   Object.defineProperty(proxy, idKey, {
@@ -49,9 +49,9 @@ var createProxy = function(id, value) {
 var isObject = function(value) {
   return constructors.has(value?.constructor?.name ?? "");
 };
-function isProxy(value) {
+var isProxy = function(value) {
   return value?.[idKey] instanceof ID;
-}
+};
 var transform = function(id, value) {
   if (!isObject(value)) {
     return value;
@@ -70,18 +70,12 @@ var idKey = "__id__";
 
 class ID {
 }
-/**
- * @template {Record<number | string, unknown>} T
- * @param {T} value 
- * @returns {T}
- */
 function proxy(value) {
-  if (typeof value !== "object" || value === undefined || value === null) {
+  if (typeof value !== "object" || value === null) {
     throw new TypeError("Value must be an object");
   }
   return createProxy(undefined, value);
 }
 export {
-  isProxy,
   proxy as default
 };
